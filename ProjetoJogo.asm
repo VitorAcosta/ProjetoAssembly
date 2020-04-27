@@ -4,20 +4,20 @@
 ORG 0000h ;RESET
 LJMP CONFIG ;PULA PARA A ROTINA CONFIG
 
-;-------------------INTERRUPÇÃO EXTERNA 0---------------------------
+;-------------------INTERRUPÃ‡ÃƒO EXTERNA 0---------------------------
 ORG 0003h
 INT_EXT0:
 	INC P1
 	RETI
 
-;-------------------INTERRUPÇÃO DO TEMPORIZADOR 0-------------------
+;-------------------INTERRUPÃ‡ÃƒO DO TEMPORIZADOR 0-------------------
 ORG 000Bh
 INT_TEMP0:	
 	MOV TH0, #0 ;Move para o valor de recarga do contador o valor 0.
 	MOV TL0, #0 ;Move para o contador o valor 0.
 	RETI
 
-;-------------------INTERRUPÇÃO EXTERNA 1---------------------------
+;-------------------INTERRUPÃ‡ÃƒO EXTERNA 1---------------------------
 ORG 0013h 
 INT_EXT1:
 	DEC P1
@@ -25,7 +25,7 @@ INT_EXT1:
 
 
 
-;----------------- CÓDIGO PRINCIPAL --------------------------------
+;----------------- CÃ“DIGO PRINCIPAL --------------------------------
 ORG 0080h
 RANDOM:
 	MOV A, TL0
@@ -48,26 +48,27 @@ FIM_ROTACAO:
 CONFIG:
 	
 	MOV R7, #255
-	;----------------------- CONFIGURAÇÕES DAS INTERRUPÇÕES EXTERNAS ------------------------------
-	SETB IT0 ;Define o tipo de interrupção externa sendo
+	;----------------------- CONFIGURAÃ‡Ã•ES DAS INTERRUPÃ‡Ã•ES EXTERNAS ------------------------------
+	SETB IT0 ;Define o tipo de interrupÃ§Ã£o externa sendo
 			 ;executada toda vez que ocorre uma borda de descida
 			 ;no pino P3.2.
-	SETB EX0 ;Habilita a interrupção externa 0 do registrador
-	SETB IT1 ;Define o tipo de interrupção externa sendo
+	SETB EX0 ;Habilita a interrupÃ§Ã£o externa 0 do registrador
+	SETB IT1 ;Define o tipo de interrupÃ§Ã£o externa sendo
 			 ;executada toda vez que ocorre uma borda de descida
 			 ;no pino P3.3.
-	SETB EX1 ;Habilita a interrupção externa 1 do registrador    
-    SETB EA ;Habilita as interrupções
+	SETB EX1 ;Habilita a interrupÃ§Ã£o externa 1 do registrador    
+    SETB EA ;Habilita as interrupÃ§Ãµes
 	;---------------------------------------------------------------------------------------------
 	
-	;------------------------ INTERRUPÇÕES DO TEMPORIZADOR ---------------------------------------
-	MOV TMOD,#2 ;Modo 2 - Temporizador/Contador de 8 bits com recarga automática.
+	;------------------------ INTERRUPÃ‡Ã•ES DO TEMPORIZADOR ---------------------------------------
+	MOV TMOD,#2 ;Modo 2 - Temporizador/Contador de 8 bits com recarga automÃ¡tica.
 	MOV TH0, #0 ;Move para o valor de recarga do contador o valor 0.
 	MOV TL0, #0 ;Move para o contador o valor 0.
-	SETB ET0 ;Habilita a interrupção do contador 0.
+	SETB ET0 ;Habilita a interrupÃ§Ã£o do contador 0.
 	SETB TR0 ;LIGA O CONTADOR 0
 	;---------------------------------------------------------------------------------------------
 
 START_GAME:
 	CALL RANDOM
 	DJNZ R7, START_GAME
+	aaaa
