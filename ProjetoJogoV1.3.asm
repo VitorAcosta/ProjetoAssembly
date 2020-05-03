@@ -1,58 +1,67 @@
 ; AUTHORS: VITOR ACOSTA DA ROSA
 ;		 : ANDY SILVA BARBOSA
 
+; R7 -> Marcador para o tempo de execu√ß√£o do jogo (Loop).
+; R6 -> Marcador para DELAYS.
+; R5 -> N√£o usado.
+; R4 -> N√£o usado.
+; R3 -> N√£o usado.
+; R2 -> Marcador para rotacionar os bits da sequ√™ncia gerada pelo 8051.
+; R1 -> Ponteiro para mem√≥ria, serve para salvar a sequ√™ncia gerada pelo 8051.
+; R0 -> Ponteiro para mem√≥ria, serve para salvar a sequ√™ncia inserida pelo usu√°rio.
+
 ORG 0000h ;RESET
 LJMP CONFIG ;PULA PARA A ROTINA CONFIG
 
-;-------------------INTERRUP«√O EXTERNA 0---------------------------
+;-------------------INTERRUP√á√ÉO EXTERNA 0---------------------------
 ORG 0003h
 ; Rotina INT_EXT0:
-; AtravÈs da interrupÁ„o externa 0, ativada pelo P3.2 o usu·rio poder·
-; comeÁar o jogo. Se pressionar novamente, o jogo pausa.
+; Atrav√©s da interrup√ß√£o externa 0, ativada pelo P3.2 o usu√°rio poder√°
+; come√ßar o jogo. Se pressionar novamente, o jogo pausa.
 INT_EXT0:
 	AJMP START_GAME
 	RETI
 
-;-------------------INTERRUP«√O DO TEMPORIZADOR 0-------------------
+;-------------------INTERRUP√á√ÉO DO TEMPORIZADOR 0-------------------
 ORG 000Bh
 INT_TEMP0:	
 	MOV TH0, #0 ;Move para o valor de recarga do contador o valor 0.
 	MOV TL0, #0 ;Move para o contador o valor 0.
 	RETI
 
-;-------------------INTERRUP«√O EXTERNA 1---------------------------
+;-------------------INTERRUP√á√ÉO EXTERNA 1---------------------------
 ORG 0013h 
 ; Rotina INT_EXT1:
-; AtravÈs da interrupÁ„o externa 1, ativada pelo P3.3 o usu·rio poder·
-; resetar o jogo. (Por enquanto, a funÁ„o n„o est· disponÌvel)
+; Atrav√©s da interrup√ß√£o externa 1, ativada pelo P3.3 o usu√°rio poder√°
+; resetar o jogo. (Por enquanto, a fun√ß√£o n√£o est√° dispon√≠vel)
 INT_EXT1:
 	RETI
 
 
 
-;----------------- C”DIGO PRINCIPAL --------------------------------
+;----------------- C√ìDIGO PRINCIPAL --------------------------------
 ORG 0080h
 
 ;----------------- DELAYS DO JOGO ----------------------------------
 ; ROTINA DELAY_EASY
-; Gera um delay de 200ms (Dado que DJNZ consome 2us por execuÁ„o, temos 2us * 100 = 200 ms)
+; Gera um delay de 200ms (Dado que DJNZ consome 2us por execu√ß√£o, temos 2us * 100 = 200 ms)
 DELAY_EASY:
 	DJNZ R6, DELAY_EASY
 	RET
 
 ; ROTINA DELAY_ARMAZENAMENTO
-; Gera um delay de 200ms entre cada inserÁ„o do usu·rio
-; (Dado que DJNZ consome 2us por execuÁ„o, temos 2us * 100 = 200 ms)
+; Gera um delay de 200ms entre cada inser√ß√£o do usu√°rio
+; (Dado que DJNZ consome 2us por execu√ß√£o, temos 2us * 100 = 200 ms)
 DELAY_ARMAZENAMENTO:
 	DJNZ R6, DELAY_ARMAZENAMENTO
 	MOV R6,#32
 	RET
 
 
-;----------------- FUN«’ES AUXILIARES DO JOGO ----------------------
+;----------------- FUN√á√ïES AUXILIARES DO JOGO ----------------------
 
 ; ROTINA ROTATE
-; Rotaciona a sequÍncia de 8bits inserida no acumulador A, B vezes.
+; Rotaciona a sequ√™ncia de 8bits inserida no acumulador A, B vezes.
 ROTATE:
 	RR A 
 	DJNZ B, ROTATE
@@ -60,16 +69,16 @@ ROTATE:
 	LJMP START_GAME
 
 ; ROTINA SALVA_SEQ
-; Rotina que percorre a memÛria na qual R1 aponta e salva o cÛdigo
-; bin·rio do acendimento dos LEDS nessa posiÁ„o (em HEX)
+; Rotina que percorre a mem√≥ria na qual R1 aponta e salva o c√≥digo
+; bin√°rio do acendimento dos LEDS nessa posi√ß√£o (em HEX)
 SALVA_SEQ:
 	MOV @R1, P1
 	INC R1
 	LJMP START_GAME
 
 ;ROTINA SALVA_USR
-; Rotina que percorre a memÛria na qual R0 aponta e salva o cÛdigo
-; bin·rio inserido pelo usu·rio nos botıes SW2 atÈ SW7 (em HEX)
+; Rotina que percorre a mem√≥ria na qual R0 aponta e salva o c√≥digo
+; bin√°rio inserido pelo usu√°rio nos bot√µes SW2 at√© SW7 (em HEX)
 SALVA_USR:
 	MOV @R0, P2
 	INC R0
@@ -77,12 +86,12 @@ SALVA_USR:
 
 ;------------------------------------------------------------------
 
-;----------------- FUN«’ES DO JOGO ---------------------------------
+;----------------- FUN√á√ïES DO JOGO ---------------------------------
 ; ROTINA RANDOM:
-; Para gerar n˙meros aleatÛrios primeiramente È movido o valor do contador para o acumulador A
-; em seguida, como deseja-se adquirir o mÛdulo, È feita a divis„o por 6 o resto(B) È considerado e
+; Para gerar n√∫meros aleat√≥rios primeiramente √© movido o valor do contador para o acumulador A
+; em seguida, como deseja-se adquirir o m√≥dulo, √© feita a divis√£o por 6 o resto(B) √© considerado e
 ; o quociente(A) descartado. 
-; Dessa forma, o resto representar· a quantidade de vezes que a sequÍncia de 8bits (inicial 01111111) passar· na rotaÁ„o.
+; Dessa forma, o resto representar√° a quantidade de vezes que a sequ√™ncia de 8bits (inicial 01111111) passar√° na rota√ß√£o.
 RANDOM:
 	MOV A, TL0
 	MOV B, #6h
@@ -96,36 +105,36 @@ RANDOM:
 
 
 ; ROTINA SALVA_RANDOM
-; Para cada led aceso da sequÍncia, È salvo os 8bits de P1 em uma posiÁ„o de memÛria.
+; Para cada led aceso da sequ√™ncia, √© salvo os 8bits de P1 em uma posi√ß√£o de mem√≥ria.
 SALVA_RANDOM:
-	CJNE R1, #82, SALVA_SEQ ;Caso a sequÍncia n„o est· completa, pula para uma rotina auxiliar.
+	CJNE R1, #82, SALVA_SEQ ;Caso a sequ√™ncia n√£o est√° completa, pula para uma rotina auxiliar.
 	MOV @R1, P1
-	CPL P0.0 ;Define uma FLAG, indicando que a sequÍncia foi salva em sua totalidade,
-			 ;e permitindo que o usu·rio digite a sua sequÍncia.
+	CPL P0.0 ;Define uma FLAG, indicando que a sequ√™ncia foi salva em sua totalidade,
+			 ;e permitindo que o usu√°rio digite a sua sequ√™ncia.
 	RET
 
 
 ; ROTINA ARMAZENA_USER
-; Rotina que verifica e salva a sequÍncia de botıes apertados pelo usu·rio.
+; Rotina que verifica e salva a sequ√™ncia de bot√µes apertados pelo usu√°rio.
 ARMAZENA_USER:
-	MOV P1, P2 ;Mostra qual o bot„o o usu·rio apertou
-	;CALL DELAY_ARMAZENAMENTO ;Delay para visualizaÁ„o do LED pressionado
+	MOV P1, P2 ;Mostra qual o bot√£o o usu√°rio apertou
+	;CALL DELAY_ARMAZENAMENTO ;Delay para visualiza√ß√£o do LED pressionado
 	MOV P1, #11111111b ;Apaga os LEDS
 
-	CJNE R0, #98, SALVA_USR ;Verifica se a sequÍncia foi escrita em sua totalidade.
+	CJNE R0, #98, SALVA_USR ;Verifica se a sequ√™ncia foi escrita em sua totalidade.
 	MOV @R0, P2
 
-	CPL P0.0 ;Flag que autoriza a continuaÁ„o do cÛdigo, j· que o usu·rio inseriu
-			 ;sua sequÍncia.
+	CPL P0.0 ;Flag que autoriza a continua√ß√£o do c√≥digo, j√° que o usu√°rio inseriu
+			 ;sua sequ√™ncia.
 
-	CPL P0.1 ;Flag que permite a comparaÁ„o entre a sequÍncia gerada pelo microcontrolador
-			 ;com a sequencia inserida pelo usu·rio.
+	CPL P0.1 ;Flag que permite a compara√ß√£o entre a sequ√™ncia gerada pelo microcontrolador
+			 ;com a sequencia inserida pelo usu√°rio.
 
 	LJMP START_GAME
 
 ; ROTINA LOOP_INSERT
-; Espera que o usu·rio pressione pelo menos um bot„o entre SW2 e SW7, para
-; comparar com a sequÍncia do jogo.
+; Espera que o usu√°rio pressione pelo menos um bot√£o entre SW2 e SW7, para
+; comparar com a sequ√™ncia do jogo.
 LOOP_INSERT:
 	JNB P2.7, ARMAZENA_USER
 	JNB P2.6, ARMAZENA_USER
@@ -136,44 +145,44 @@ LOOP_INSERT:
 	SJMP LOOP_INSERT
 
 ; ROTINA COMPARA_JOGO
-; Rotina respons·vel por comparar a sequÍncia gerada aleatÛriamente com
-; a sequÍncia inserida pelo usu·rio, a fim de mostrar a vitÛria ou a derrota.
+; Rotina respons√°vel por comparar a sequ√™ncia gerada aleat√≥riamente com
+; a sequ√™ncia inserida pelo usu√°rio, a fim de mostrar a vit√≥ria ou a derrota.
 COMPARA_JOGO:
 	SJMP $
 
 
-;-------------------------- CONFIGURA«’ES DO JOGO ----------------------------------------
+;-------------------------- CONFIGURA√á√ïES DO JOGO ----------------------------------------
 CONFIG:
 	MOV R7, #255
 
 	;--------------- APONTAMENTOS INICIAIS -----------
-	;Apontamento inicial para a posiÁ„o de memÛria onde ficar· salvo as sequencias de LEDS
+	;Apontamento inicial para a posi√ß√£o de mem√≥ria onde ficar√° salvo as sequencias de LEDS
 	MOV R1, #80 
 	MOV R0, #96 
 	;-------------------------------------------------
 
-	;----------------------- CONFIGURA«’ES DAS INTERRUP«’ES EXTERNAS ------------------------------
-	SETB IT0 ;Define o tipo de interrupÁ„o externa sendo
+	;----------------------- CONFIGURA√á√ïES DAS INTERRUP√á√ïES EXTERNAS ------------------------------
+	SETB IT0 ;Define o tipo de interrup√ß√£o externa sendo
 			 ;executada toda vez que ocorre uma borda de descida
 			 ;no pino P3.2.
-	SETB EX0 ;Habilita a interrupÁ„o externa 0 do registrador
-	SETB IT1 ;Define o tipo de interrupÁ„o externa sendo
+	SETB EX0 ;Habilita a interrup√ß√£o externa 0 do registrador
+	SETB IT1 ;Define o tipo de interrup√ß√£o externa sendo
 			 ;executada toda vez que ocorre uma borda de descida
 			 ;no pino P3.3.
-	SETB EX1 ;Habilita a interrupÁ„o externa 1 do registrador    
-    SETB EA ;Habilita as interrupÁıes
+	SETB EX1 ;Habilita a interrup√ß√£o externa 1 do registrador    
+    SETB EA ;Habilita as interrup√ß√µes
 	;---------------------------------------------------------------------------------------------
 	
-	;------------------------ INTERRUP«’ES DO TEMPORIZADOR ---------------------------------------
-	MOV TMOD,#2 ;Modo 2 - Temporizador/Contador de 8 bits com recarga autom·tica.
+	;------------------------ INTERRUP√á√ïES DO TEMPORIZADOR ---------------------------------------
+	MOV TMOD,#2 ;Modo 2 - Temporizador/Contador de 8 bits com recarga autom√°tica.
 	MOV TH0, #0 ;Move para o valor de recarga do contador o valor 0.
 	MOV TL0, #0 ;Move para o contador o valor 0.
-	SETB ET0 ;Habilita a interrupÁ„o do contador 0.
+	SETB ET0 ;Habilita a interrup√ß√£o do contador 0.
 	SETB TR0 ;LIGA O CONTADOR 0
 	;---------------------------------------------------------------------------------------------
 
 ; ROTINA PRE_GAME
-; Assegura que o usu·rio aperte o bot„o para que o jogo comece
+; Assegura que o usu√°rio aperte o bot√£o para que o jogo comece
 PRE_GAME:
 	MOV R6, #32
 	JB P3.2, PRE_GAME
