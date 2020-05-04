@@ -1,6 +1,7 @@
 ; AUTHORS: VITOR ACOSTA DA ROSA
 ;		 : ANDY SILVA BARBOSA
 
+; Frequencia utilizada: 8
 ; R7 -> Marcador para o tempo de execução do jogo (Loop).
 ; R6 -> Marcador para DELAYS.
 ; R5 -> Não usado.
@@ -66,7 +67,7 @@ ROTATE:
 	RR A 
 	DJNZ B, ROTATE
 	MOV P1, A
-	LJMP START_GAME
+	RET
 
 ; ROTINA SALVA_SEQ
 ; Rotina que percorre a memória na qual R1 aponta e salva o código
@@ -74,7 +75,7 @@ ROTATE:
 SALVA_SEQ:
 	MOV @R1, P1
 	INC R1
-	LJMP START_GAME
+	RET
 
 ;ROTINA SALVA_USR
 ; Rotina que percorre a memória na qual R0 aponta e salva o código
@@ -83,6 +84,15 @@ SALVA_USR:
 	MOV @R0, P2
 	INC R0
 	LJMP START_GAME
+
+GERA_SEED:
+	MOV A, TL0
+	MOV B, #17
+	MUL AB
+	RLC A
+	ADD A, B
+	MOV TL0, A
+	RET
 
 ;------------------------------------------------------------------
 
@@ -93,6 +103,8 @@ SALVA_USR:
 ; o quociente(A) descartado. 
 ; Dessa forma, o resto representará a quantidade de vezes que a sequência de 8bits (inicial 01111111) passará na rotação.
 RANDOM:
+    CALL GERA_SEED
+	MOV P1, #11111111b
 	MOV A, TL0
 	MOV B, #6h
 	DIV AB
@@ -101,13 +113,13 @@ RANDOM:
 	MOV R2,B
 	
 	CJNE R2,#0h,ROTATE
-	RET
+	LJMP START_GAME
 
 
 ; ROTINA SALVA_RANDOM
 ; Para cada led aceso da sequência, é salvo os 8bits de P1 em uma posição de memória.
 SALVA_RANDOM:
-	CJNE R1, #82, SALVA_SEQ ;Caso a sequência não está completa, pula para uma rotina auxiliar.
+	CJNE R1, #89, SALVA_SEQ ;Caso a sequência não está completa, pula para uma rotina auxiliar.
 	MOV @R1, P1
 	CPL P0.0 ;Define uma FLAG, indicando que a sequência foi salva em sua totalidade,
 			 ;e permitindo que o usuário digite a sua sequência.
@@ -121,7 +133,7 @@ ARMAZENA_USER:
 	;CALL DELAY_ARMAZENAMENTO ;Delay para visualização do LED pressionado
 	MOV P1, #11111111b ;Apaga os LEDS
 
-	CJNE R0, #98, SALVA_USR ;Verifica se a sequência foi escrita em sua totalidade.
+	CJNE R0, #101, SALVA_USR ;Verifica se a sequência foi escrita em sua totalidade.
 	MOV @R0, P2
 
 	CPL P0.0 ;Flag que autoriza a continuação do código, já que o usuário inseriu
@@ -154,6 +166,7 @@ COMPARA_JOGO:
 ;-------------------------- CONFIGURAÇÕES DO JOGO ----------------------------------------
 CONFIG:
 	MOV R7, #255
+	MOV R6, #11
 
 	;--------------- APONTAMENTOS INICIAIS -----------
 	;Apontamento inicial para a posição de memória onde ficará salvo as sequencias de LEDS
@@ -184,7 +197,6 @@ CONFIG:
 ; ROTINA PRE_GAME
 ; Assegura que o usuário aperte o botão para que o jogo comece
 PRE_GAME:
-	MOV R6, #32
 	JB P3.2, PRE_GAME
 
 START_GAME:
