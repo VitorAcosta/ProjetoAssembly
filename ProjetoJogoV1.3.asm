@@ -55,7 +55,7 @@ DELAY_EASY:
 ; (Dado que DJNZ consome 2us por execução, temos 2us * 100 = 200 ms)
 DELAY_ARMAZENAMENTO:
 	DJNZ R6, DELAY_ARMAZENAMENTO
-	MOV R6,#32
+	MOV R6,#60
 	RET
 
 
@@ -83,6 +83,8 @@ SALVA_SEQ:
 SALVA_USR:
 	MOV @R0, P2
 	INC R0
+	CALL DELAY_ARMAZENAMENTO ;Delay para visualização do LED pressionado
+	MOV P1, #11111111b ;Apaga os LEDS
 	LJMP START_GAME
 
 GERA_SEED:
@@ -119,7 +121,7 @@ RANDOM:
 ; ROTINA SALVA_RANDOM
 ; Para cada led aceso da sequência, é salvo os 8bits de P1 em uma posição de memória.
 SALVA_RANDOM:
-	CJNE R1, #89, SALVA_SEQ ;Caso a sequência não está completa, pula para uma rotina auxiliar.
+	CJNE R1, #84, SALVA_SEQ ;Caso a sequência não está completa, pula para uma rotina auxiliar.
 	MOV @R1, P1
 	CPL P0.0 ;Define uma FLAG, indicando que a sequência foi salva em sua totalidade,
 			 ;e permitindo que o usuário digite a sua sequência.
@@ -130,10 +132,8 @@ SALVA_RANDOM:
 ; Rotina que verifica e salva a sequência de botões apertados pelo usuário.
 ARMAZENA_USER:
 	MOV P1, P2 ;Mostra qual o botão o usuário apertou
-	;CALL DELAY_ARMAZENAMENTO ;Delay para visualização do LED pressionado
-	MOV P1, #11111111b ;Apaga os LEDS
-
-	CJNE R0, #101, SALVA_USR ;Verifica se a sequência foi escrita em sua totalidade.
+	
+	CJNE R0, #100, SALVA_USR ;Verifica se a sequência foi escrita em sua totalidade.
 	MOV @R0, P2
 
 	CPL P0.0 ;Flag que autoriza a continuação do código, já que o usuário inseriu
@@ -141,13 +141,14 @@ ARMAZENA_USER:
 
 	CPL P0.1 ;Flag que permite a comparação entre a sequência gerada pelo microcontrolador
 			 ;com a sequencia inserida pelo usuário.
-
 	LJMP START_GAME
 
 ; ROTINA LOOP_INSERT
 ; Espera que o usuário pressione pelo menos um botão entre SW2 e SW7, para
 ; comparar com a sequência do jogo.
 LOOP_INSERT:
+	MOV P1, #00000011b
+	MOV P1, #11111111b
 	JNB P2.7, ARMAZENA_USER
 	JNB P2.6, ARMAZENA_USER
 	JNB P2.5, ARMAZENA_USER
@@ -160,13 +161,15 @@ LOOP_INSERT:
 ; Rotina responsável por comparar a sequência gerada aleatóriamente com
 ; a sequência inserida pelo usuário, a fim de mostrar a vitória ou a derrota.
 COMPARA_JOGO:
+	MOV P1, #11111111b
+	
 	SJMP $
 
 
 ;-------------------------- CONFIGURAÇÕES DO JOGO ----------------------------------------
 CONFIG:
 	MOV R7, #255
-	MOV R6, #11
+	MOV R6, #60
 
 	;--------------- APONTAMENTOS INICIAIS -----------
 	;Apontamento inicial para a posição de memória onde ficará salvo as sequencias de LEDS
